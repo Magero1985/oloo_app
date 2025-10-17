@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Oloo App - Stay Connected</title>
+    <title>Oloo - Stay Connected</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -320,11 +320,37 @@
         .messages-container {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 20px;
             background: #F5F5DC;
             position: relative;
             -webkit-overflow-scrolling: touch;
             min-height: 0;
+        }
+        .hieroglyphic-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.06;
+            font-size: 35px;
+            line-height: 55px;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+            word-wrap: break-word;
+            padding: 20px;
+        }
+        .ankh-symbol {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 250px;
+            opacity: 0.02;
+            color: var(--gold);
+            pointer-events: none;
         }
         .messages {
             position: relative;
@@ -360,12 +386,6 @@
         .message-text {
             margin-bottom: 4px;
             font-size: 15px;
-        }
-        .message-image {
-            max-width: 100%;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            cursor: pointer;
         }
         .message-time {
             font-size: 11px;
@@ -443,7 +463,6 @@
             color: #666;
         }
         .hidden { display: none !important; }
-        .file-input { display: none; }
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -546,11 +565,14 @@
                     </div>
 
                     <div class="messages-container" id="messagesContainer">
+                        <div class="hieroglyphic-bg">
+𓀀 𓀁 𓀂 𓀃 𓀄 𓀅 𓀆 𓀇 𓀈 𓀉 𓀊 𓀋 𓀌 𓀍 𓀎 𓀏 𓀐 𓀑 𓀒 𓀓 𓀔 𓀕 𓀖 𓀗 𓀘 𓀙 𓀚 𓀛 𓀜 𓀝 𓀞 𓀟 𓀠 𓀡 𓀢 𓀣 𓀤 𓀥 𓀦 𓀧 𓀨 𓀩 𓁀 𓁁 𓁂 𓁃 𓁄 𓁅 𓁆 𓁇 𓁈 𓁉 𓁊 𓁋 𓁌 𓁍 𓁎 𓁏 𓁐 𓁑 𓁒 𓁓 𓁔 𓁕 𓁖 𓁗 𓁘 𓁙 𓁚 𓁛 𓁜 𓁝 𓁞 𓁟 𓁠 𓁡 𓁢 𓁣 𓁤 𓁥 𓁦 𓁧 𓁨 𓁩 𓂀 𓂁 𓂂 𓂃 𓂄 𓂅 𓂆 𓂇 𓂈 𓂉 𓂊 𓂋 𓂌 𓂍 𓂎 𓂏 𓂐 𓂑 𓂒 𓂓 𓂔 𓂕 𓂖 𓂗 𓂘 𓂙 𓂚 𓂛 𓂜 𓂝 𓂞 𓂟 𓂠 𓂡 𓂢 𓂣 𓂤 𓂥 𓂦 𓂧 𓂨 𓂩 𓃀 𓃁 𓃂 𓃃 𓃄 𓃅 𓃆 𓃇 𓃈 𓃉 𓃊 𓃋 𓃌 𓃍 𓃎 𓃏 𓃐 𓃑 𓃒 𓃓 𓃔 𓃕 𓃖 𓃗 𓃘 𓃙 𓃚 𓃛 𓃜 𓃝 𓃞 𓃟 𓃠 𓃡 𓃢 𓃣 𓃤 𓃥 𓃦 𓃧 𓃨 𓃩 𓄀 𓄁 𓄂 𓄃 𓄄 𓄅 𓄆 𓄇 𓄈 𓄉 𓄊 𓄋 𓄌 𓄍 𓄎 𓄏 𓄐 𓄑 𓄒 𓄓 𓄔 𓄕 𓄖 𓄗 𓄘 𓄙 𓄚 𓄛 𓄜 𓄝 𓄞 𓄟 𓄠 𓄡 𓄢 𓄣 𓄤 𓄥 𓄦 𓄧 𓄨 𓄩 𓅀 𓅁 𓅂 𓅃 𓅄 𓅅 𓅆 𓅇 𓅈 𓅉 𓅊 𓅋 𓅌 𓅍 𓅎 𓅏
+                        </div>
+                        <div class="ankh-symbol">☥</div>
                         <div class="messages" id="messages"></div>
                     </div>
 
                     <div class="message-input-container">
-                        <input type="file" id="imageInput" class="file-input" accept="image/*" onchange="handleImageSelect(event)">
                         <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
                         <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
                     </div>
@@ -563,33 +585,26 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <script>
-        // TODO: Replace with your Firebase config from Firebase Console
         const firebaseConfig = {
-  apiKey: "AIzaSyAYFky7QV9dpoGG-uY_2aYNyarXJd4oUiE",
-  authDomain: "tau-connect-app.firebaseapp.com",
-  projectId: "tau-connect-app",
-  storageBucket: "tau-connect-app.firebasestorage.app",
-  messagingSenderId: "276047207095",
-  appId: "1:276047207095:web:1c9fafe933bcf5ba1d8b32"
-};
+            apiKey: "AIzaSyAYFky7QV9dpoGG-uY_2aYNyarXJd4oUiE",
+            authDomain: "tau-connect-app.firebaseapp.com",
+            projectId: "tau-connect-app",
+            storageBucket: "tau-connect-app.firebasestorage.app",
+            messagingSenderId: "276047207095",
+            appId: "1:276047207095:web:1c9fafe933bcf5ba1d8b32"
+        };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
-
-        // Force storage bucket creation (remove after first run)
-        console.log('Storage bucket:', storage.ref().bucket);
 
         let currentUser = null;
         let selectedContact = null;
         let unsubscribeMessages = null;
+        let unsubscribeUsers = null;
 
-        // AUTH FUNCTIONS
         function showError(msg) {
             const el = document.getElementById('authError');
             el.textContent = msg;
@@ -630,11 +645,11 @@
                     name: name,
                     email: email,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    online: true
+                    online: true,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 currentUser = userCredential.user;
-                showApp();
             } catch (error) {
                 showError(error.message);
             }
@@ -657,8 +672,6 @@
                     online: true,
                     lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
-
-                showApp();
             } catch (error) {
                 showError(error.message);
             }
@@ -667,10 +680,14 @@
         async function logout() {
             if (confirm('Are you sure you want to logout?')) {
                 try {
+                    if (unsubscribeMessages) unsubscribeMessages();
+                    if (unsubscribeUsers) unsubscribeUsers();
+                    
                     await db.collection('users').doc(currentUser.uid).update({
                         online: false,
                         lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    
                     await auth.signOut();
                     location.reload();
                 } catch (error) {
@@ -679,7 +696,6 @@
             }
         }
 
-        // APP FUNCTIONS
         function showApp() {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
@@ -691,15 +707,17 @@
             loadUsers();
         }
 
-        // LOAD USERS
         function loadUsers() {
-            db.collection('users')
-                .where('email', '!=', currentUser.email)
+            if (unsubscribeUsers) unsubscribeUsers();
+            
+            unsubscribeUsers = db.collection('users')
                 .onSnapshot(snapshot => {
                     const contactsList = document.getElementById('contactsList');
                     contactsList.innerHTML = '';
 
                     snapshot.forEach(doc => {
+                        if (doc.id === currentUser.uid) return;
+                        
                         const user = doc.data();
                         const contactEl = document.createElement('div');
                         contactEl.className = 'contact-item';
@@ -729,7 +747,6 @@
             });
         }
 
-        // SELECT CONTACT
         function selectContact(userId, userData) {
             selectedContact = { id: userId, ...userData };
 
@@ -757,7 +774,6 @@
             }
         }
 
-        // MESSAGES
         function loadMessages(contactId) {
             if (unsubscribeMessages) unsubscribeMessages();
 
@@ -774,14 +790,14 @@
                     snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
                             const msg = change.doc.data();
-                            addMessageToUI(msg.text, msg.imageUrl, msg.senderId === currentUser.uid, msg.timestamp);
+                            addMessageToUI(msg.text, msg.senderId === currentUser.uid, msg.timestamp);
                         }
                     });
                     scrollToBottom();
                 });
         }
 
-        function addMessageToUI(text, imageUrl, isSent, timestamp) {
+        function addMessageToUI(text, isSent, timestamp) {
             const messagesContainer = document.getElementById('messages');
             const messageEl = document.createElement('div');
             messageEl.className = `message ${isSent ? 'sent' : 'received'}`;
@@ -792,17 +808,9 @@
                 time = date.getHours() + ':' + String(date.getMinutes()).padStart(2, '0');
             }
             
-            let content = '';
-            if (imageUrl) {
-                content = `<img src="${imageUrl}" class="message-image" onclick="window.open('${imageUrl}', '_blank')">`;
-            }
-            if (text) {
-                content += `<div class="message-text">${escapeHtml(text)}</div>`;
-            }
-            
             messageEl.innerHTML = `
                 <div class="message-bubble">
-                    ${content}
+                    <div class="message-text">${escapeHtml(text)}</div>
                     <div class="message-time">${time}</div>
                 </div>
             `;
@@ -821,7 +829,6 @@
                 
                 await db.collection('chats').doc(chatId).collection('messages').add({
                     text: text,
-                    imageUrl: null,
                     senderId: currentUser.uid,
                     receiverId: selectedContact.id,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -834,45 +841,8 @@
             }
         }
 
-        async function handleImageSelect(event) {
-            const file = event.target.files[0];
-            if (!file || !selectedContact) return;
-
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Image must be less than 5MB');
-                return;
-            }
-
-            alert('Image upload is temporarily disabled. Please set up Firebase Storage first.');
-            event.target.value = '';
-            
-            /* UNCOMMENT WHEN STORAGE IS READY
-            try {
-                const timestamp = Date.now();
-                const storageRef = storage.ref(`images/${currentUser.uid}/${timestamp}_${file.name}`);
-                const uploadTask = await storageRef.put(file);
-                const imageUrl = await uploadTask.ref.getDownloadURL();
-
-                const chatId = [currentUser.uid, selectedContact.id].sort().join('_');
-                
-                await db.collection('chats').doc(chatId).collection('messages').add({
-                    text: '',
-                    imageUrl: imageUrl,
-                    senderId: currentUser.uid,
-                    receiverId: selectedContact.id,
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                event.target.value = '';
-            } catch (error) {
-                console.error('Error uploading image:', error);
-                alert('Failed to upload image. Please try again.');
-            }
-            */
-        }
-
         function showStorageNotice() {
-            alert('📷 Image upload feature\n\nTo enable image sharing:\n1. Set up Firebase Storage in console\n2. Add Storage rules\n3. Uncomment image upload code\n\nFor now, text messaging works perfectly!');
+            alert('📷 Image upload feature\n\nTo enable image sharing:\n1. Set up Firebase Storage in console\n2. Add Storage rules\n3. Enable image upload code\n\nFor now, text messaging works perfectly!');
         }
 
         function handleKeyPress(event) {
@@ -895,7 +865,6 @@
             return div.innerHTML;
         }
 
-        // AUTH STATE LISTENER
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -903,7 +872,6 @@
             }
         });
 
-        // INIT
         window.onload = function() {
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.add('mobile-active');
@@ -915,6 +883,15 @@
                 document.getElementById('sidebar').style.display = 'flex';
             }
         });
+
+        window.addEventListener('beforeunload', async () => {
+            if (currentUser) {
+                await db.collection('users').doc(currentUser.uid).update({
+                    online: false,
+                    lastSeen: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            }
+        });
     </script>
 </body>
-                    </html>
+</html>

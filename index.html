@@ -541,7 +541,7 @@
                             </div>
                         </div>
                         <div class="chat-actions">
-                            <button class="icon-btn" onclick="document.getElementById('imageInput').click()" title="Send Image">📷</button>
+                            <button class="icon-btn" onclick="showStorageNotice()" title="Send Image (Coming Soon)">📷</button>
                         </div>
                     </div>
 
@@ -581,6 +581,9 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
+
+        // Force storage bucket creation (remove after first run)
+        console.log('Storage bucket:', storage.ref().bucket);
 
         let currentUser = null;
         let selectedContact = null;
@@ -840,6 +843,10 @@
                 return;
             }
 
+            alert('Image upload is temporarily disabled. Please set up Firebase Storage first.');
+            event.target.value = '';
+            
+            /* UNCOMMENT WHEN STORAGE IS READY
             try {
                 const timestamp = Date.now();
                 const storageRef = storage.ref(`images/${currentUser.uid}/${timestamp}_${file.name}`);
@@ -861,6 +868,11 @@
                 console.error('Error uploading image:', error);
                 alert('Failed to upload image. Please try again.');
             }
+            */
+        }
+
+        function showStorageNotice() {
+            alert('📷 Image upload feature\n\nTo enable image sharing:\n1. Set up Firebase Storage in console\n2. Add Storage rules\n3. Uncomment image upload code\n\nFor now, text messaging works perfectly!');
         }
 
         function handleKeyPress(event) {
@@ -905,4 +917,4 @@
         });
     </script>
 </body>
-</html>
+                    </html>

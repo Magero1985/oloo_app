@@ -981,17 +981,6 @@
             }
 
             try {
-                // Generate encryption keys
-                showNotification('Generating secure keys...', 'info');
-                const keyPair = await generateKeyPair();
-                if (!keyPair) {
-                    showError('Failed to generate encryption keys');
-                    return;
-                }
-                
-                const publicKeyString = await exportPublicKey(keyPair.publicKey);
-                await storePrivateKey(keyPair.privateKey);
-                
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 await userCredential.user.updateProfile({ displayName: name });
                 
@@ -1001,14 +990,12 @@
                     status: status,
                     about: '',
                     photoURL: '',
-                    publicKey: publicKeyString, // Store public key for E2EE
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     online: true,
                     lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 currentUser = userCredential.user;
-                showNotification('Account created with end-to-end encryption! 🔐', 'success');
             } catch (error) {
                 showError(error.message);
             }
@@ -1223,21 +1210,10 @@
             unsubscribeMessages = messagesRef
                 .orderBy('timestamp', 'asc')
                 .onSnapshot(snapshot => {
-                    snapshot.docChanges().forEach(async change => {
+                    snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
                             const msg = change.doc.data();
-                            let displayText = msg.text;
-                            
-                            // Decrypt if message is encrypted and user is recipient
-                            if (msg.encrypted && msg.senderId !== currentUser.uid && type === 'user') {
-                                const privateKey = await loadPrivateKey();
-                                if (privateKey) {
-                                    displayText = await decryptMessage(msg.text, privateKey);
-                                    console.log('🔓 Message decrypted');
-                                }
-                            }
-                            
-                            addMessageToUI(displayText, msg.mediaUrl, msg.mediaType, msg.senderId, msg.senderName, msg.timestamp, type);
+                            addMessageToUI(msg.text, msg.mediaUrl, msg.mediaType, msg.senderId, msg.senderName, msg.timestamp, type);
                         }
                     });
                     scrollToBottom();

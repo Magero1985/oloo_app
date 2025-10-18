@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Oloo App - Stay Connected</title>
+    <title>Oloo - Stay Connected</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -606,8 +606,8 @@
         <!-- AUTH SCREEN -->
         <div class="auth-screen" id="authScreen">
             <div class="logo">O</div>
-            <div class="app-name">Oloo App</div>
-            <div class="tagline">Stay Connected - Africa Community</div>
+            <div class="app-name">Oloo</div>
+            <div class="tagline">Stay Connected - Student Community</div>
             
             <div class="auth-form">
                 <div class="error-msg" id="authError"></div>
@@ -835,6 +835,14 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
+        // Initialize storage bucket - helps create default bucket if missing
+        console.log('Storage initialized:', storage.app.name);
+        
+        // Test storage access (comment out after first successful run)
+        storage.ref().child('test.txt').putString('test')
+            .then(() => console.log('✅ Storage working!'))
+            .catch(err => console.error('❌ Storage error:', err.message));
+
         let currentUser = null;
         let selectedContact = null;
         let unsubscribeMessages = null;
@@ -842,6 +850,101 @@
         let unsubscribeGroups = null;
         let currentTab = 'chats';
         let currentChatType = 'user'; // 'user' or 'group'
+        let isOnline = navigator.onLine;
+        let messageQueue = []; // Queue for offline messages
+
+        // OFFLINE/ONLINE DETECTION
+        window.addEventListener('online', () => {
+            isOnline = true;
+            console.log('✅ Back online - syncing messages...');
+            syncQueuedMessages();
+            showNotification('Connected! Syncing messages...', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            isOnline = false;
+            console.log('📴 Offline mode - messages will queue');
+            showNotification('Offline Mode - Messages will send when connected', 'warning');
+        });
+
+        // Load message queue from localStorage on startup
+        function loadMessageQueue() {
+            const saved = localStorage.getItem('messageQueue');
+            if (saved) {
+                messageQueue = JSON.parse(saved);
+            }
+        }
+
+        // Save message queue to localStorage
+        function saveMessageQueue() {
+            localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+        }
+
+        // Sync queued messages when back online
+        async function syncQueuedMessages() {
+            if (messageQueue.length === 0) return;
+
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const senderName = userDoc.data().name;
+
+            for (const msg of messageQueue) {
+                try {
+                    if (msg.chatType === 'group') {
+                        await db.collection('groups').doc(msg.contactId).collection('messages').add({
+                            text: msg.text,
+                            mediaUrl: null,
+                            mediaType: null,
+                            senderId: currentUser.uid,
+                            senderName: senderName,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    } else {
+                        const chatId = [currentUser.uid, msg.contactId].sort().join('_');
+                        
+                        await db.collection('chats').doc(chatId).collection('messages').add({
+                            text: msg.text,
+                            mediaUrl: null,
+                            mediaType: null,
+                            senderId: currentUser.uid,
+                            senderName: senderName,
+                            receiverId: msg.contactId,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                    console.log('✅ Synced message:', msg.text);
+                } catch (error) {
+                    console.error('Failed to sync message:', error);
+                }
+            }
+
+            messageQueue = [];
+            saveMessageQueue();
+            showNotification('All messages synced!', 'success');
+        }
+
+        // Show notification to user
+        function showNotification(message, type = 'info') {
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#FF9800' : '#2196F3'};
+                color: white;
+                border-radius: 8px;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                animation: slideIn 0.3s;
+            `;
+            notif.textContent = message;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s';
+                setTimeout(() => notif.remove(), 300);
+            }, 3000);
+        }
 
         // AUTH FUNCTIONS
         function showError(msg) {
@@ -1117,7 +1220,7 @@
                 });
         }
 
-        async function addMessageToUI(text, mediaUrl, mediaType, senderId, senderName, timestamp, chatType) {
+        async function addMessageToUI(text, mediaUrl, mediaType, senderId, senderName, timestamp, chatType, isQueued = false) {
             const messagesContainer = document.getElementById('messages');
             const messageEl = document.createElement('div');
             const isSent = senderId === currentUser.uid;
@@ -1145,10 +1248,13 @@
                 content += `<div class="message-text">${escapeHtml(text)}</div>`;
             }
             
+            // Add queued indicator
+            const queuedIndicator = isQueued ? ' <span style="opacity: 0.6;">⏳</span>' : '';
+            
             messageEl.innerHTML = `
                 <div class="message-bubble">
                     ${content}
-                    <div class="message-time">${time}</div>
+                    <div class="message-time">${time}${queuedIndicator}</div>
                 </div>
             `;
             
@@ -1161,6 +1267,27 @@
             
             if (!text || !selectedContact) return;
             
+            // OFFLINE MODE: Queue message for later
+            if (!isOnline) {
+                const queuedMsg = {
+                    text: text,
+                    contactId: selectedContact.id,
+                    chatType: currentChatType,
+                    timestamp: Date.now()
+                };
+                
+                messageQueue.push(queuedMsg);
+                saveMessageQueue();
+                
+                // Show message locally with "queued" indicator
+                addMessageToUI(text, null, null, currentUser.uid, 'You', { toDate: () => new Date() }, currentChatType, true);
+                
+                input.value = '';
+                showNotification('Message queued - will send when online', 'warning');
+                return;
+            }
+
+            // ONLINE MODE: Send immediately
             try {
                 const userDoc = await db.collection('users').doc(currentUser.uid).get();
                 const senderName = userDoc.data().name;
@@ -1191,11 +1318,32 @@
                 input.value = '';
             } catch (error) {
                 console.error('Error sending message:', error);
-                alert('Failed to send message. Please try again.');
+                
+                // If failed due to network, queue it
+                if (error.code === 'unavailable' || error.code === 'permission-denied') {
+                    const queuedMsg = {
+                        text: text,
+                        contactId: selectedContact.id,
+                        chatType: currentChatType,
+                        timestamp: Date.now()
+                    };
+                    
+                    messageQueue.push(queuedMsg);
+                    saveMessageQueue();
+                    showNotification('Connection issue - message queued', 'warning');
+                } else {
+                    alert('Failed to send message. Please try again.');
+                }
             }
         }
 
         async function handleMediaSelect(event) {
+            // TEMPORARY: Disable until storage is set up
+            alert('📷 Media Upload\n\nStorage setup required:\n1. Upgrade to Blaze plan (still FREE tier)\n2. Add credit card to Firebase\n3. Storage rules will activate\n\nText messaging works perfectly!');
+            event.target.value = '';
+            return;
+            
+            /* UNCOMMENT WHEN STORAGE IS READY
             const file = event.target.files[0];
             if (!file || !selectedContact) return;
 
@@ -1252,6 +1400,7 @@
                 console.error('Error uploading media:', error);
                 alert('Failed to upload. Make sure Firebase Storage is enabled.');
             }
+            */
         }
 
         function handleKeyPress(event) {
@@ -1510,6 +1659,14 @@
         window.onload = function() {
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.add('mobile-active');
+            }
+            
+            // Load queued messages from previous session
+            loadMessageQueue();
+            
+            // Check online status and sync if online
+            if (isOnline && messageQueue.length > 0) {
+                console.log(`📤 Found ${messageQueue.length} queued messages, will sync when logged in`);
             }
         };
 

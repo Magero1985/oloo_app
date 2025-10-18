@@ -2,28 +2,11 @@
   "background_color": "#ffffff",
   "dir": "ltr",
   "display": "standalone",
-  "name": "magero1985.github",
+  "name": "Oloo.messenger",
   "orientation": "any",
   "scope": "/",
-  "short_name": "oloo",
+  "short_name": "Oloo",
   "start_url": "https://magero1985.github.io/oloo_app/",
   "theme_color": "#ffffff",
-  "id": "Oloo_app ",
-  "description": "messenging",
-  "categories": [
-    "business",
-    "education",
-    "entertainment",
-    "finance",
-    "food",
-    "games",
-    "health",
-    "medical",
-    "personalization",
-    "productivity",
-    "security",
-    "social",
-    "travel",
-    "utilities"
-  ]
+  "id": "Oloo_app "
 }

@@ -1,25 +1,29 @@
-```json
 {
-  "name": "Oloo Chat - Student Community",
-  "short_name": "Oloo",
-  "description": "Stay connected with your student community",
-  "start_url": "/",
+  "background_color": "#ffffff",
+  "dir": "ltr",
   "display": "standalone",
-  "background_color": "#87CEEB",
-  "theme_color": "#00BFFF",
-  "orientation": "portrait-primary",
+  "name": "magero1985.github",
+  "orientation": "any",
   "scope": "/",
-  "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+  "short_name": "oloo",
+  "start_url": "https://magero1985.github.io/oloo_app/",
+  "theme_color": "#ffffff",
+  "id": "Oloo_app ",
+  "description": "messenging",
+  "categories": [
+    "business",
+    "education",
+    "entertainment",
+    "finance",
+    "food",
+    "games",
+    "health",
+    "medical",
+    "personalization",
+    "productivity",
+    "security",
+    "social",
+    "travel",
+    "utilities"
   ]
 }
-```

@@ -676,15 +676,19 @@
                 gap: 6px;
                 min-height: 55px;
                 max-height: 55px;
-                position: sticky;
-                bottom: 0;
+                flex-shrink: 0;
+                position: relative;
                 z-index: 100;
+                background: #f9f9f9;
+                display: flex !important;
+                visibility: visible !important;
             }
 
             .message-input {
                 font-size: 16px;
                 padding: 10px 12px;
                 flex: 1;
+                min-width: 0;
             }
 
             .send-btn {
@@ -704,6 +708,7 @@
                 padding: 10px 12px;
                 min-height: 60px;
                 max-height: 60px;
+                flex-shrink: 0;
             }
 
             .contact-avatar, #chatAvatar {
@@ -720,16 +725,16 @@
                 font-size: 12px;
             }
 
-            @supports (padding: env(safe-area-inset-bottom)) {
-                .message-input-container {
-                    padding-bottom: calc(8px + env(safe-area-inset-bottom));
-                }
+            input[type="text"], 
+            textarea {
+                -webkit-appearance: none;
+                appearance: none;
             }
 
-            @supports (padding: max(0px)) {
-                .message-input-container {
-                    padding-bottom: max(8px, env(safe-area-inset-bottom));
-                }
+            input:focus, 
+            textarea:focus, 
+            select:focus {
+                font-size: 16px !important;
             }
         }
 
@@ -839,7 +844,7 @@
                             </div>
                         </div>
                         <div class="chat-actions">
-                            <button class="icon-btn" onclick="document.getElementById('mediaInput').click()" title="Send Media">📷</button>
+                            <button class="icon-btn" onclick="showMediaAlert()" title="Send Media">📷</button>
                             <button class="icon-btn" onclick="showChatInfo()" title="Info">ℹ️</button>
                         </div>
                     </div>
@@ -853,7 +858,6 @@
                     </div>
 
                     <div class="message-input-container">
-                        <input type="file" id="mediaInput" class="file-input" accept="image/*,video/*" onchange="handleMediaSelect(event)">
                         <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
                         <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
                     </div>
@@ -870,11 +874,10 @@
                 <button class="close-btn" onclick="closeModal('profileModal')">&times;</button>
             </div>
             <div class="profile-photo-upload">
-                <div class="profile-photo-preview" id="profilePhotoPreview" onclick="document.getElementById('profilePhotoInput').click()">
+                <div class="profile-photo-preview" id="profilePhotoPreview">
                     <span id="profilePhotoText">📷</span>
                 </div>
-                <input type="file" id="profilePhotoInput" class="file-input" accept="image/*" onchange="handleProfilePhotoSelect(event)">
-                <p style="color: #666; font-size: 14px;">Click to change profile photo</p>
+                <p style="color: #666; font-size: 14px;">Profile photos coming soon</p>
             </div>
             <div class="input-group">
                 <label>Name</label>
@@ -980,23 +983,15 @@
         const db = firebase.firestore();
         const storage = firebase.storage();
 
-        // Initialize storage bucket - helps create default bucket if missing
-        console.log('Storage initialized:', storage.app.name);
-        
-        // Test storage access (comment out after first successful run)
-        storage.ref().child('test.txt').putString('test')
-            .then(() => console.log('✅ Storage working!'))
-            .catch(err => console.error('❌ Storage error:', err.message));
-
         let currentUser = null;
         let selectedContact = null;
         let unsubscribeMessages = null;
         let unsubscribeUsers = null;
         let unsubscribeGroups = null;
         let currentTab = 'chats';
-        let currentChatType = 'user'; // 'user' or 'group'
+        let currentChatType = 'user';
         let isOnline = navigator.onLine;
-        let messageQueue = []; // Queue for offline messages
+        let messageQueue = [];
 
         // OFFLINE/ONLINE DETECTION
         window.addEventListener('online', () => {
@@ -1012,7 +1007,6 @@
             showNotification('Offline Mode - Messages will send when connected', 'warning');
         });
 
-        // Load message queue from localStorage on startup
         function loadMessageQueue() {
             const saved = localStorage.getItem('messageQueue');
             if (saved) {
@@ -1020,12 +1014,10 @@
             }
         }
 
-        // Save message queue to localStorage
         function saveMessageQueue() {
             localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
         }
 
-        // Sync queued messages when back online
         async function syncQueuedMessages() {
             if (messageQueue.length === 0) return;
 
@@ -1067,7 +1059,6 @@
             showNotification('All messages synced!', 'success');
         }
 
-        // Show notification to user
         function showNotification(message, type = 'info') {
             const notif = document.createElement('div');
             notif.style.cssText = `
@@ -1091,7 +1082,6 @@
             }, 3000);
         }
 
-        // AUTH FUNCTIONS
         function showError(msg) {
             const el = document.getElementById('authError');
             el.textContent = msg;
@@ -1126,17 +1116,6 @@
             }
 
             try {
-                // Generate encryption keys
-                showNotification('Generating secure keys...', 'info');
-                const keyPair = await generateKeyPair();
-                if (!keyPair) {
-                    showError('Failed to generate encryption keys');
-                    return;
-                }
-                
-                const publicKeyString = await exportPublicKey(keyPair.publicKey);
-                await storePrivateKey(keyPair.privateKey);
-                
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 await userCredential.user.updateProfile({ displayName: name });
                 
@@ -1146,14 +1125,13 @@
                     status: status,
                     about: '',
                     photoURL: '',
-                    publicKey: publicKeyString, // Store public key for E2EE
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     online: true,
                     lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 currentUser = userCredential.user;
-                showNotification('Account created with end-to-end encryption! 🔐', 'success');
+                showNotification('Account created successfully! 🎉', 'success');
             } catch (error) {
                 showError(error.message);
             }
@@ -1201,7 +1179,6 @@
             }
         }
 
-        // APP FUNCTIONS
         async function showApp() {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('appContainer').style.display = 'flex';
@@ -1222,7 +1199,6 @@
             loadGroups();
         }
 
-        // TAB SWITCHING
         function switchTab(tab) {
             currentTab = tab;
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -1235,7 +1211,6 @@
             }
         }
 
-        // LOAD USERS
         function loadUsers() {
             if (unsubscribeUsers) unsubscribeUsers();
             
@@ -1273,7 +1248,6 @@
                 });
         }
 
-        // LOAD GROUPS
         function loadGroups() {
             if (unsubscribeGroups) unsubscribeGroups();
             
@@ -1310,7 +1284,6 @@
             });
         }
 
-        // SELECT CONTACT/GROUP
         function selectContact(id, data, type) {
             selectedContact = { id: id, ...data };
             currentChatType = type;
@@ -1350,7 +1323,6 @@
             }
         }
 
-        // MESSAGES
         function loadMessages(contactId, type) {
             if (unsubscribeMessages) unsubscribeMessages();
 
@@ -1368,28 +1340,17 @@
             unsubscribeMessages = messagesRef
                 .orderBy('timestamp', 'asc')
                 .onSnapshot(snapshot => {
-                    snapshot.docChanges().forEach(async change => {
+                    snapshot.docChanges().forEach(change => {
                         if (change.type === 'added') {
                             const msg = change.doc.data();
-                            let displayText = msg.text;
-                            
-                            // Decrypt if message is encrypted and user is recipient
-                            if (msg.encrypted && msg.senderId !== currentUser.uid && type === 'user') {
-                                const privateKey = await loadPrivateKey();
-                                if (privateKey) {
-                                    displayText = await decryptMessage(msg.text, privateKey);
-                                    console.log('🔓 Message decrypted');
-                                }
-                            }
-                            
-                            addMessageToUI(displayText, msg.mediaUrl, msg.mediaType, msg.senderId, msg.senderName, msg.timestamp, type);
+                            addMessageToUI(msg.text, msg.mediaUrl, msg.mediaType, msg.senderId, msg.senderName, msg.timestamp, type);
                         }
                     });
                     scrollToBottom();
                 });
         }
 
-        async function addMessageToUI(text, mediaUrl, mediaType, senderId, senderName, timestamp, chatType, isQueued = false) {
+        function addMessageToUI(text, mediaUrl, mediaType, senderId, senderName, timestamp, chatType, isQueued = false) {
             const messagesContainer = document.getElementById('messages');
             const messageEl = document.createElement('div');
             const isSent = senderId === currentUser.uid;
@@ -1417,7 +1378,6 @@
                 content += `<div class="message-text">${escapeHtml(text)}</div>`;
             }
             
-            // Add queued indicator
             const queuedIndicator = isQueued ? ' <span style="opacity: 0.6;">⏳</span>' : '';
             
             messageEl.innerHTML = `
@@ -1436,7 +1396,6 @@
             
             if (!text || !selectedContact) return;
             
-            // OFFLINE MODE: Queue message for later
             if (!isOnline) {
                 const queuedMsg = {
                     text: text,
@@ -1448,7 +1407,6 @@
                 messageQueue.push(queuedMsg);
                 saveMessageQueue();
                 
-                // Show message locally with "queued" indicator
                 addMessageToUI(text, null, null, currentUser.uid, 'You', { toDate: () => new Date() }, currentChatType, true);
                 
                 input.value = '';
@@ -1456,7 +1414,6 @@
                 return;
             }
 
-            // ONLINE MODE: Send immediately
             try {
                 const userDoc = await db.collection('users').doc(currentUser.uid).get();
                 const senderName = userDoc.data().name;
@@ -1488,7 +1445,6 @@
             } catch (error) {
                 console.error('Error sending message:', error);
                 
-                // If failed due to network, queue it
                 if (error.code === 'unavailable' || error.code === 'permission-denied') {
                     const queuedMsg = {
                         text: text,
@@ -1506,70 +1462,8 @@
             }
         }
 
-        async function handleMediaSelect(event) {
-            // TEMPORARY: Disable until storage is set up
+        function showMediaAlert() {
             alert('📷 Media Upload\n\nStorage setup required:\n1. Upgrade to Blaze plan (still FREE tier)\n2. Add credit card to Firebase\n3. Storage rules will activate\n\nText messaging works perfectly!');
-            event.target.value = '';
-            return;
-            
-            /* UNCOMMENT WHEN STORAGE IS READY
-            const file = event.target.files[0];
-            if (!file || !selectedContact) return;
-
-            const isImage = file.type.startsWith('image/');
-            const isVideo = file.type.startsWith('video/');
-            
-            if (!isImage && !isVideo) {
-                alert('Please select an image or video file');
-                return;
-            }
-
-            const maxSize = isVideo ? 20 * 1024 * 1024 : 5 * 1024 * 1024;
-            if (file.size > maxSize) {
-                alert(`File too large. Max size: ${isVideo ? '20MB for videos' : '5MB for images'}`);
-                return;
-            }
-
-            try {
-                const timestamp = Date.now();
-                const folder = isVideo ? 'videos' : 'images';
-                const storageRef = storage.ref(`${folder}/${currentUser.uid}/${timestamp}_${file.name}`);
-                
-                const uploadTask = await storageRef.put(file);
-                const mediaUrl = await uploadTask.ref.getDownloadURL();
-
-                const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                const senderName = userDoc.data().name;
-
-                if (currentChatType === 'group') {
-                    await db.collection('groups').doc(selectedContact.id).collection('messages').add({
-                        text: '',
-                        mediaUrl: mediaUrl,
-                        mediaType: isVideo ? 'video' : 'image',
-                        senderId: currentUser.uid,
-                        senderName: senderName,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                } else {
-                    const chatId = [currentUser.uid, selectedContact.id].sort().join('_');
-                    
-                    await db.collection('chats').doc(chatId).collection('messages').add({
-                        text: '',
-                        mediaUrl: mediaUrl,
-                        mediaType: isVideo ? 'video' : 'image',
-                        senderId: currentUser.uid,
-                        senderName: senderName,
-                        receiverId: selectedContact.id,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                }
-
-                event.target.value = '';
-            } catch (error) {
-                console.error('Error uploading media:', error);
-                alert('Failed to upload. Make sure Firebase Storage is enabled.');
-            }
-            */
         }
 
         function handleKeyPress(event) {
@@ -1592,7 +1486,6 @@
             return div.innerHTML;
         }
 
-        // PROFILE FUNCTIONS
         async function openProfileModal() {
             const userDoc = await db.collection('users').doc(currentUser.uid).get();
             const userData = userDoc.data();
@@ -1609,32 +1502,6 @@
             }
             
             document.getElementById('profileModal').classList.add('active');
-        }
-
-        async function handleProfilePhotoSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            if (file.size > 2 * 1024 * 1024) {
-                alert('Profile photo must be less than 2MB');
-                return;
-            }
-
-            try {
-                const storageRef = storage.ref(`profiles/${currentUser.uid}/profile.jpg`);
-                await storageRef.put(file);
-                const photoURL = await storageRef.getDownloadURL();
-                
-                document.getElementById('profilePhotoPreview').innerHTML = `<img src="${photoURL}" alt="Profile">`;
-                
-                await db.collection('users').doc(currentUser.uid).update({ photoURL: photoURL });
-                
-                const avatarEl = document.getElementById('userAvatar');
-                avatarEl.innerHTML = `<img src="${photoURL}" alt="Profile">`;
-            } catch (error) {
-                console.error('Error uploading photo:', error);
-                alert('Failed to upload photo');
-            }
         }
 
         async function updateProfile() {
@@ -1665,7 +1532,6 @@
             }
         }
 
-        // GROUP FUNCTIONS
         async function openNewGroupModal() {
             const membersList = document.getElementById('groupMembersList');
             membersList.innerHTML = '';
@@ -1734,7 +1600,6 @@
             }
         }
 
-        // VIEW CONTACT PROFILE
         async function viewContactProfile() {
             if (currentChatType === 'group') {
                 showChatInfo();
@@ -1759,7 +1624,6 @@
             document.getElementById('contactInfoModal').classList.add('active');
         }
 
-        // SHOW GROUP INFO
         async function showChatInfo() {
             if (currentChatType !== 'group') return;
 
@@ -1811,12 +1675,10 @@
             }
         }
 
-        // MODAL FUNCTIONS
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
 
-        // AUTH STATE LISTENER
         auth.onAuthStateChanged(user => {
             if (user) {
                 currentUser = user;
@@ -1824,16 +1686,13 @@
             }
         });
 
-        // INIT
         window.onload = function() {
             if (window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.add('mobile-active');
             }
             
-            // Load queued messages from previous session
             loadMessageQueue();
             
-            // Check online status and sync if online
             if (isOnline && messageQueue.length > 0) {
                 console.log(`📤 Found ${messageQueue.length} queued messages, will sync when logged in`);
             }
@@ -1854,74 +1713,23 @@
             }
         });
 
-    // This is the service worker with the combined offline experience (Offline page + Offline copy of pages)
-
-const CACHE = "pwabuilder-offline-page";
-
-importScripts('https://storage.googleapis.com/workbox-cdn/releases/5.1.2/workbox-sw.js');
-
-// TODO: replace the following with the correct offline fallback page i.e.: const offlineFallbackPage = "offline.html";
-const offlineFallbackPage = "oloo-connect-app.html";
-
-self.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
-    self.skipWaiting();
-  }
-});
-
-self.addEventListener('install', async (event) => {
-  event.waitUntil(
-    caches.open(CACHE)
-      .then((cache) => cache.add(offlineFallbackPage))
-  );
-});
-
-if (workbox.navigationPreload.isSupported()) {
-  workbox.navigationPreload.enable();
-}
-
-workbox.routing.registerRoute(
-  new RegExp('/*'),
-  new workbox.strategies.StaleWhileRevalidate({
-    cacheName: CACHE
-  })
-);
-
-self.addEventListener('fetch', (event) => {
-  if (event.request.mode === 'navigate') {
-    event.respondWith((async () => {
-      try {
-        const preloadResp = await event.preloadResponse;
-
-        if (preloadResp) {
-          return preloadResp;
-        }
-
-        const networkResp = await fetch(event.request);
-        return networkResp;
-      } catch (error) 
-      {
-
-        const cache = await caches.open(CACHE);
-        const cachedResp = await cache.match(offlineFallbackPage);
-        return cachedResp;
-      }
-       // Close modals when clicking outside
         window.onclick = function(event) {
             if (event.target.classList.contains('modal')) {
                 event.target.classList.remove('active');
             }
-        }; 
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('/service-worker.js')
-        .then(function(registration) {
-          console.log('ServiceWorker registration successful:', registration);
-        }, function(error) {
-          console.log('ServiceWorker registration failed:', error);
-        });
-    });
-  }
+        };
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(function(registration) {
+                        console.log('✅ ServiceWorker registered:', registration.scope);
+                    })
+                    .catch(function(error) {
+                        console.log('⚠️ ServiceWorker registration failed (optional):', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>

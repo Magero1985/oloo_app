@@ -1272,14 +1272,16 @@
 
     <script>
         const firebaseConfig = {
-            apiKey: "AIzaSyAYFky7QV9dpoGG-uY_2aYNyarXJd4oUiE",
-            authDomain: "tau-connect-app.firebaseapp.com",
-            projectId: "tau-connect-app",
-            storageBucket: "tau-connect-app.firebasestorage.app",
-            messagingSenderId: "276047207095",
-            appId: "1:276047207095:web:1c9fafe933bcf5ba1d8b32"
-        };
+  apiKey: "AIzaSyCdhTgHCM3yqQoyCUzhbWCr9XXgLfoKXbI",
+  authDomain: "oloo-messenger.firebaseapp.com",
+  projectId: "oloo-messenger",
+  storageBucket: "oloo-messenger.firebasestorage.app",
+  messagingSenderId: "118674836359",
+  appId: "1:118674836359:web:a0c9c2ed3de421745a6122"
+};
 
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();

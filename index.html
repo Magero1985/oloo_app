@@ -349,6 +349,7 @@
             align-items: center;
             gap: 15px;
             cursor: pointer;
+            flex: 1;
         }
         .back-btn {
             display: none;
@@ -426,6 +427,8 @@
             border-radius: 18px;
             position: relative;
             word-wrap: break-word;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .message.received .message-bubble {
             background: white;
@@ -479,34 +482,33 @@
             margin-bottom: 4px;
             color: var(--deep-sky);
         }
-        .message-actions {
-            position: absolute;
-            top: 5px;
+        .message-context-menu {
+            position: fixed;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            padding: 8px 0;
+            z-index: 1000;
+            min-width: 200px;
             display: none;
-            z-index: 10;
         }
-        .message:hover .message-actions {
-            display: flex;
+        .message-context-menu.active {
+            display: block;
         }
-        .message.sent .message-actions {
-            left: -80px;
-        }
-        .message.received .message-actions {
-            right: -80px;
-        }
-        .message-action-btn {
-            padding: 8px 12px;
-            background: none;
-            border: none;
+        .context-menu-item {
+            padding: 12px 20px;
             cursor: pointer;
-            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--dark-text);
             transition: background 0.2s;
         }
-        .message-action-btn:hover {
+        .context-menu-item:hover {
             background: var(--light-sky);
+        }
+        .context-menu-item.danger {
+            color: #f44336;
         }
         .message-input-container {
             padding: 12px 15px;
@@ -560,7 +562,7 @@
             outline: none;
             border-color: var(--deep-sky);
         }
-        .send-btn {
+        .send-btn, .attach-btn {
             width: 45px;
             height: 45px;
             border-radius: 50%;
@@ -575,7 +577,7 @@
             transition: transform 0.2s;
             flex-shrink: 0;
         }
-        .send-btn:hover { transform: scale(1.1); }
+        .send-btn:hover, .attach-btn:hover { transform: scale(1.1); }
         .welcome-screen {
             display: flex;
             flex-direction: column;
@@ -606,18 +608,20 @@
         .welcome-text p {
             font-size: 18px;
             color: #666;
+            margin-bottom: 20px;
         }
         .digital-clock {
             margin-top: 20px;
-            font-size: 24px;
+            font-size: 28px;
             font-family: 'Courier New', monospace;
             color: var(--deep-sky);
             font-weight: bold;
+            letter-spacing: 2px;
         }
         .digital-date {
             font-size: 16px;
             color: #666;
-            margin-top: 5px;
+            margin-top: 8px;
         }
         .modal {
             display: none;
@@ -870,7 +874,7 @@
             }
 
             .digital-clock {
-                font-size: 20px;
+                font-size: 22px;
             }
 
             .digital-date {
@@ -901,7 +905,7 @@
                 min-width: 0;
             }
 
-            .send-btn {
+            .send-btn, .attach-btn {
                 width: 38px;
                 height: 38px;
                 font-size: 16px;
@@ -936,7 +940,10 @@
             }
 
             input[type="text"], 
-            textarea {
+            textarea,
+            input[type="email"],
+            input[type="password"],
+            input[type="tel"] {
                 -webkit-appearance: none;
                 appearance: none;
             }
@@ -945,13 +952,6 @@
             textarea:focus, 
             select:focus {
                 font-size: 16px !important;
-            }
-
-            .message-actions {
-                position: static;
-                display: flex !important;
-                margin-top: 5px;
-                justify-content: flex-end;
             }
         }
 
@@ -983,11 +983,11 @@
                 <div id="loginForm">
                     <div class="input-group">
                         <label>Email</label>
-                        <input type="email" id="loginEmail" placeholder="your@email.com">
+                        <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email">
                     </div>
                     <div class="input-group">
                         <label>Password</label>
-                        <input type="password" id="loginPassword" placeholder="Enter your password">
+                        <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
                     </div>
                     <button class="btn btn-primary" onclick="login()">Login</button>
                     <button class="btn btn-secondary" onclick="showSignup()">Create Account</button>
@@ -996,15 +996,15 @@
                 <div id="signupForm" class="hidden">
                     <div class="input-group">
                         <label>Full Name</label>
-                        <input type="text" id="signupName" placeholder="John Doe">
+                        <input type="text" id="signupName" placeholder="John Doe" autocomplete="name">
                     </div>
                     <div class="input-group">
                         <label>Phone Number</label>
-                        <input type="tel" id="signupPhone" placeholder="+1234567890">
+                        <input type="tel" id="signupPhone" placeholder="+1234567890" autocomplete="tel">
                     </div>
                     <div class="input-group">
                         <label>Email</label>
-                        <input type="email" id="signupEmail" placeholder="your@email.com">
+                        <input type="email" id="signupEmail" placeholder="your@email.com" autocomplete="email">
                     </div>
                     <div class="input-group">
                         <label>Status (Optional)</label>
@@ -1012,7 +1012,7 @@
                     </div>
                     <div class="input-group">
                         <label>Password</label>
-                        <input type="password" id="signupPassword" placeholder="At least 6 characters">
+                        <input type="password" id="signupPassword" placeholder="At least 6 characters" autocomplete="new-password">
                     </div>
                     <button class="btn btn-primary" onclick="signup()">Create Account</button>
                     <button class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
@@ -1079,7 +1079,8 @@
                             </div>
                         </div>
                         <div class="chat-actions">
-                            <button class="icon-btn" onclick="showMediaAlert()" title="Send Media">📷</button>
+                            <button class="icon-btn" onclick="initiateVoiceCall()" title="Voice Call">📞</button>
+                            <button class="icon-btn" onclick="initiateVideoCall()" title="Video Call">📹</button>
                             <button class="icon-btn" onclick="showChatInfo()" title="Info">ℹ️</button>
                         </div>
                     </div>
@@ -1099,12 +1100,32 @@
                             <div class="reply-preview-text" id="replyPreviewText"></div>
                         </div>
                         <div class="message-input-row">
+                            <button class="attach-btn" onclick="showAttachmentOptions()" title="Attach">📎</button>
                             <input type="text" class="message-input" id="messageInput" placeholder="Type a message..." onkeypress="handleKeyPress(event)">
                             <button class="send-btn" onclick="sendMessage()" title="Send">➤</button>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- MESSAGE CONTEXT MENU -->
+    <div class="message-context-menu" id="messageContextMenu">
+        <div class="context-menu-item" onclick="contextMenuAction('reply')">
+            <span>↩️</span> Reply
+        </div>
+        <div class="context-menu-item" onclick="contextMenuAction('forward')">
+            <span>↗️</span> Forward
+        </div>
+        <div class="context-menu-item" onclick="contextMenuAction('edit')">
+            <span>✏️</span> Edit
+        </div>
+        <div class="context-menu-item" onclick="contextMenuAction('emoji')">
+            <span>😊</span> React
+        </div>
+        <div class="context-menu-item danger" onclick="contextMenuAction('delete')">
+            <span>🗑️</span> Delete
         </div>
     </div>
 
@@ -1148,12 +1169,16 @@
                 <h2>Add Contact</h2>
                 <button class="close-btn" onclick="closeModal('addContactModal')">&times;</button>
             </div>
+            <p style="color: #666; margin-bottom: 15px;">Search for Oloo users by email or phone number</p>
             <div class="input-group">
                 <label>Search by Email or Phone</label>
                 <input type="text" id="searchContactInput" placeholder="Enter email or phone number">
             </div>
             <div id="searchContactResult"></div>
             <button class="btn btn-primary" onclick="searchForContact()">Search</button>
+            <hr style="margin: 20px 0; border: none; border-top: 1px solid #e0e0e0;">
+            <button class="btn btn-secondary" onclick="requestContactsPermission()">📱 Import Phone Contacts</button>
+            <p style="color: #999; font-size: 12px; margin-top: 10px; text-align: center;">We'll find your friends who are already on Oloo</p>
         </div>
     </div>
 
@@ -1252,6 +1277,21 @@
         </div>
     </div>
 
+    <!-- FORWARD MESSAGE MODAL -->
+    <div class="modal" id="forwardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Forward Message</h2>
+                <button class="close-btn" onclick="closeModal('forwardModal')">&times;</button>
+            </div>
+            <div class="input-group">
+                <label>Select contacts and groups</label>
+                <div class="group-members" id="forwardList"></div>
+            </div>
+            <button class="btn btn-primary" onclick="confirmForward()">Forward</button>
+        </div>
+    </div>
+
     <!-- CONFIRM DIALOG -->
     <div class="modal" id="confirmDialog">
         <div class="confirm-dialog">
@@ -1264,23 +1304,27 @@
         </div>
     </div>
 
-    <!-- Firebase SDK -->
+    <!-- File input for documents -->
+    <input type="file" id="documentInput" class="file-input" accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.ppt,.pptx" onchange="handleDocumentUpload(event)">
+<!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <script>
+        // Initialize Firebase first
         const firebaseConfig = {
-  apiKey: "AIzaSyCdhTgHCM3yqQoyCUzhbWCr9XXgLfoKXbI",
-  authDomain: "oloo-messenger.firebaseapp.com",
-  projectId: "oloo-messenger",
-  storageBucket: "oloo-messenger.firebasestorage.app",
-  messagingSenderId: "118674836359",
-  appId: "1:118674836359:web:a0c9c2ed3de421745a6122"
+  apiKey: "AIzaSyCMSIcH-QW6JxDxQ0AVqAGo6gGBUiNTVmo",
+  authDomain: "oloo-app-53e5b.firebaseapp.com",
+  projectId: "oloo-app-53e5b",
+  storageBucket: "oloo-app-53e5b.firebasestorage.app",
+  messagingSenderId: "1070668984013",
+  appId: "1:1070668984013:web:97fd591d2a4b71cc240384",
+  measurementId: "G-L2KE1X7DM6"
 };
 
-     // Initialize Firebase app
+        // Initialize Firebase app
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -1289,7 +1333,6 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
         const storage = firebase.storage();
-
 
         let currentUser = null;
         let selectedContact = null;
@@ -1301,6 +1344,9 @@
         let isOnline = navigator.onLine;
         let messageQueue = [];
         let replyingTo = null;
+        let contextMenuMessage = null;
+        let longPressTimer = null;
+        let forwardingMessage = null;
 
         // Digital Clock
         function updateClock() {
@@ -1323,6 +1369,135 @@
         setInterval(updateClock, 1000);
         updateClock();
 
+        // Voice/Video Call Functions
+        function initiateVoiceCall() {
+            if (currentChatType === 'group') {
+                showNotification('Group voice calls coming soon!', 'info');
+            } else {
+                showNotification(`Voice call to ${selectedContact.name} - Feature coming soon!`, 'info');
+            }
+        }
+
+        function initiateVideoCall() {
+            if (currentChatType === 'group') {
+                showNotification('Group video calls coming soon!', 'info');
+            } else {
+                showNotification(`Video call to ${selectedContact.name} - Feature coming soon!`, 'info');
+            }
+        }
+
+        // Attachment Options
+        function showAttachmentOptions() {
+            const options = [
+                { icon: '📄', text: 'Document', action: () => document.getElementById('documentInput').click() },
+                { icon: '📷', text: 'Photo', action: () => showNotification('Photo upload - Storage setup required', 'warning') },
+                { icon: '📹', text: 'Video', action: () => showNotification('Video upload - Storage setup required', 'warning') }
+            ];
+            
+            const menu = document.createElement('div');
+            menu.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                padding: 10px;
+                z-index: 1000;
+                display: flex;
+                gap: 15px;
+            `;
+            
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.style.cssText = `
+                    background: var(--light-sky);
+                    border: none;
+                    border-radius: 10px;
+                    padding: 15px;
+                    cursor: pointer;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 5px;
+                    min-width: 80px;
+                `;
+                btn.innerHTML = `<span style="font-size: 24px;">${opt.icon}</span><span style="font-size: 12px;">${opt.text}</span>`;
+                btn.onclick = () => {
+                    opt.action();
+                    menu.remove();
+                };
+                menu.appendChild(btn);
+            });
+            
+            document.body.appendChild(menu);
+            setTimeout(() => menu.remove(), 5000);
+        }
+
+        async function handleDocumentUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            if (file.size > 10 * 1024 * 1024) {
+                showNotification('File too large. Maximum 10MB', 'error');
+                return;
+            }
+            
+            showNotification('Document uploads require Firebase Storage setup', 'warning');
+            event.target.value = '';
+        }
+
+        // Contact Permissions
+        async function requestContactsPermission() {
+            if ('contacts' in navigator && 'ContactsManager' in window) {
+                try {
+                    const props = ['name', 'tel'];
+                    const opts = { multiple: true };
+                    const contacts = await navigator.contacts.select(props, opts);
+                    
+                    showNotification(`Found ${contacts.length} contacts. Searching for Oloo users...`, 'info');
+                    
+                    // Search for matching users
+                    for (const contact of contacts) {
+                        if (contact.tel && contact.tel.length > 0) {
+                            const phone = contact.tel[0];
+                            await searchAndAddContactByPhone(phone);
+                        }
+                    }
+                    
+                    showNotification('Contact sync complete!', 'success');
+                } catch (error) {
+                    console.log('Contact access denied or not supported');
+                    showNotification('Contact access not available. Please add contacts manually.', 'warning');
+                }
+            } else {
+                showNotification('Contact access not supported on this device. Please add contacts manually by email or phone.', 'warning');
+            }
+        }
+
+        async function searchAndAddContactByPhone(phone) {
+            try {
+                const usersSnapshot = await db.collection('users')
+                    .where('phone', '==', phone)
+                    .get();
+                
+                if (!usersSnapshot.empty && usersSnapshot.docs[0].id !== currentUser.uid) {
+                    const userId = usersSnapshot.docs[0].id;
+                    const currentUserDoc = await db.collection('users').doc(currentUser.uid).get();
+                    const myContacts = currentUserDoc.data().contacts || [];
+                    
+                    if (!myContacts.includes(userId)) {
+                        await db.collection('users').doc(currentUser.uid).update({
+                            contacts: firebase.firestore.FieldValue.arrayUnion(userId)
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error searching contact:', error);
+            }
+        }
+
         // OFFLINE/ONLINE DETECTION
         window.addEventListener('online', () => {
             isOnline = true;
@@ -1338,14 +1513,14 @@
         });
 
         function loadMessageQueue() {
-            const saved = localStorage.getItem('messageQueue');
+            const saved = localStorage.getItem(`messageQueue_${currentUser?.uid || 'temp'}`);
             if (saved) {
                 messageQueue = JSON.parse(saved);
             }
         }
 
         function saveMessageQueue() {
-            localStorage.setItem('messageQueue', JSON.stringify(messageQueue));
+            localStorage.setItem(`messageQueue_${currentUser?.uid || 'temp'}`, JSON.stringify(messageQueue));
         }
 
         async function syncQueuedMessages() {
@@ -1356,29 +1531,23 @@
 
             for (const msg of messageQueue) {
                 try {
+                    const messageData = {
+                        text: msg.text,
+                        mediaUrl: null,
+                        mediaType: null,
+                        senderId: currentUser.uid,
+                        senderName: senderName,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        deleted: false,
+                        replyTo: msg.replyTo || null
+                    };
+
                     if (msg.chatType === 'group') {
-                        await db.collection('groups').doc(msg.contactId).collection('messages').add({
-                            text: msg.text,
-                            mediaUrl: null,
-                            mediaType: null,
-                            senderId: currentUser.uid,
-                            senderName: senderName,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                            replyTo: msg.replyTo || null
-                        });
+                        await db.collection('groups').doc(msg.contactId).collection('messages').add(messageData);
                     } else {
                         const chatId = [currentUser.uid, msg.contactId].sort().join('_');
-                        
-                        await db.collection('chats').doc(chatId).collection('messages').add({
-                            text: msg.text,
-                            mediaUrl: null,
-                            mediaType: null,
-                            senderId: currentUser.uid,
-                            senderName: senderName,
-                            receiverId: msg.contactId,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                            replyTo: msg.replyTo || null
-                        });
+                        messageData.receiverId = msg.contactId;
+                        await db.collection('chats').doc(chatId).collection('messages').add(messageData);
                     }
                     console.log('✅ Synced message:', msg.text);
                 } catch (error) {
@@ -1398,18 +1567,20 @@
                 top: 20px;
                 right: 20px;
                 padding: 15px 20px;
-                background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#FF9800' : '#2196F3'};
+                background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#FF9800' : type === 'error' ? '#f44336' : '#2196F3'};
                 color: white;
                 border-radius: 8px;
                 z-index: 10000;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.3);
                 animation: slideIn 0.3s;
+                max-width: 300px;
             `;
             notif.textContent = message;
             document.body.appendChild(notif);
             
             setTimeout(() => {
-                notif.style.animation = 'slideOut 0.3s';
+                notif.style.opacity = '0';
+                notif.style.transition = 'opacity 0.3s';
                 setTimeout(() => notif.remove(), 300);
             }, 3000);
         }
@@ -1537,6 +1708,8 @@
                     online: true,
                     lastSeen: firebase.firestore.FieldValue.serverTimestamp()
                 });
+                
+                showApp();
             } catch (error) {
                 showError(error.message);
             }
@@ -1594,8 +1767,13 @@
                 avatarEl.textContent = (userData.name || 'U').charAt(0).toUpperCase();
             }
             
+            loadMessageQueue();
             loadUsers();
             loadGroups();
+            
+            if (messageQueue.length > 0) {
+                syncQueuedMessages();
+            }
         }
 
         function switchTab(tab) {
@@ -1745,25 +1923,21 @@
             unsubscribeMessages = messagesRef
                 .orderBy('timestamp', 'asc')
                 .onSnapshot(snapshot => {
-                    snapshot.docChanges().forEach(change => {
-                        if (change.type === 'added') {
-                            const msg = change.doc.data();
-                            addMessageToUI(
-                                change.doc.id,
-                                msg.text,
-                                msg.mediaUrl,
-                                msg.mediaType,
-                                msg.senderId,
-                                msg.senderName,
-                                msg.timestamp,
-                                type,
-                                msg.deleted,
-                                msg.replyTo
-                            );
-                        } else if (change.type === 'modified') {
-                            const msg = change.doc.data();
-                            updateMessageInUI(change.doc.id, msg.deleted);
-                        }
+                    messagesContainer.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const msg = doc.data();
+                        addMessageToUI(
+                            doc.id,
+                            msg.text,
+                            msg.mediaUrl,
+                            msg.mediaType,
+                            msg.senderId,
+                            msg.senderName,
+                            msg.timestamp,
+                            type,
+                            msg.deleted,
+                            msg.replyTo
+                        );
                     });
                     scrollToBottom();
                 });
@@ -1775,6 +1949,10 @@
             const isSent = senderId === currentUser.uid;
             messageEl.className = `message ${isSent ? 'sent' : 'received'} ${isDeleted ? 'deleted' : ''}`;
             messageEl.dataset.messageId = msgId;
+            messageEl.dataset.text = text || '';
+            messageEl.dataset.senderName = senderName || '';
+            messageEl.dataset.senderId = senderId || '';
+            messageEl.dataset.timestamp = timestamp ? timestamp.toDate().getTime() : Date.now();
             
             let time = 'Now';
             if (timestamp) {
@@ -1787,14 +1965,14 @@
             if (replyTo && !isDeleted) {
                 content += `
                     <div class="message-reply" onclick="scrollToMessage('${replyTo.messageId}')">
-                        <div class="reply-author">${replyTo.senderName}</div>
+                        <div class="reply-author">${escapeHtml(replyTo.senderName)}</div>
                         <div class="reply-text">${escapeHtml(replyTo.text.substring(0, 50))}${replyTo.text.length > 50 ? '...' : ''}</div>
                     </div>
                 `;
             }
             
             if (chatType === 'group' && !isSent) {
-                content += `<div class="message-sender">${senderName || 'Unknown'}</div>`;
+                content += `<div class="message-sender">${escapeHtml(senderName || 'Unknown')}</div>`;
             }
             
             if (isDeleted) {
@@ -1803,6 +1981,10 @@
                 if (mediaUrl) {
                     if (mediaType === 'video') {
                         content += `<video src="${mediaUrl}" class="message-video" controls></video>`;
+                    } else if (mediaType === 'document') {
+                        content += `<div style="padding: 10px; background: rgba(0,0,0,0.1); border-radius: 8px; margin-bottom: 5px;">
+                            📄 <a href="${mediaUrl}" target="_blank" style="color: inherit; text-decoration: underline;">Document</a>
+                        </div>`;
                     } else {
                         content += `<img src="${mediaUrl}" class="message-image" onclick="window.open('${mediaUrl}', '_blank')">`;
                     }
@@ -1812,35 +1994,210 @@
                 }
             }
             
-            const canDelete = isSent && !isDeleted && timestamp && (Date.now() - timestamp.toDate().getTime() < 3600000);
-            
             messageEl.innerHTML = `
-                <div class="message-actions">
-                    ${!isDeleted ? `<button class="message-action-btn" onclick="replyToMessage('${msgId}', '${escapeHtml(text)}', '${senderName}', '${senderId}')" title="Reply">↩️</button>` : ''}
-                    ${canDelete ? `<button class="message-action-btn" onclick="deleteMessage('${msgId}', ${chatType === 'group'})" title="Delete">🗑️</button>` : ''}
-                </div>
                 <div class="message-bubble">
                     ${content}
                     <div class="message-time">${time}</div>
                 </div>
             `;
             
+            // Long press event for context menu
+            if (!isDeleted) {
+                let pressTimer;
+                messageEl.addEventListener('touchstart', (e) => {
+                    pressTimer = setTimeout(() => {
+                        showContextMenu(e, msgId, text, senderName, senderId, isSent, timestamp);
+                    }, 500);
+                });
+                messageEl.addEventListener('touchend', () => {
+                    clearTimeout(pressTimer);
+                });
+                messageEl.addEventListener('touchmove', () => {
+                    clearTimeout(pressTimer);
+                });
+                
+                // Desktop right click
+                messageEl.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    showContextMenu(e, msgId, text, senderName, senderId, isSent, timestamp);
+                });
+            }
+            
             messagesContainer.appendChild(messageEl);
         }
 
-        function updateMessageInUI(msgId, isDeleted) {
-            const messageEl = document.querySelector(`[data-message-id="${msgId}"]`);
-            if (messageEl && isDeleted) {
-                messageEl.classList.add('deleted');
-                const textEl = messageEl.querySelector('.message-text');
-                if (textEl) {
-                    textEl.innerHTML = '🚫 This message was deleted';
-                    textEl.style.fontStyle = 'italic';
-                    textEl.style.opacity = '0.6';
+        function showContextMenu(e, msgId, text, senderName, senderId, isSent, timestamp) {
+            const menu = document.getElementById('messageContextMenu');
+            const canDelete = isSent && timestamp && (Date.now() - (timestamp.toDate ? timestamp.toDate().getTime() : timestamp) < 3600000);
+            const canEdit = isSent && timestamp && (Date.now() - (timestamp.toDate ? timestamp.toDate().getTime() : timestamp) < 900000);
+            
+            contextMenuMessage = { msgId, text, senderName, senderId, canDelete, canEdit };
+            
+            // Position menu
+            const touch = e.touches ? e.touches[0] : e;
+            menu.style.left = touch.clientX + 'px';
+            menu.style.top = touch.clientY + 'px';
+            menu.classList.add('active');
+            
+            // Hide items based on permissions
+            const items = menu.querySelectorAll('.context-menu-item');
+            items.forEach(item => {
+                const action = item.getAttribute('onclick').match(/'([^']+)'/)[1];
+                if (action === 'delete' && !canDelete) {
+                    item.style.display = 'none';
+                } else if (action === 'edit' && !canEdit) {
+                    item.style.display = 'none';
+                } else {
+                    item.style.display = 'flex';
                 }
-                const actionsEl = messageEl.querySelector('.message-actions');
-                if (actionsEl) actionsEl.remove();
+            });
+        }
+
+        function contextMenuAction(action) {
+            const menu = document.getElementById('messageContextMenu');
+            menu.classList.remove('active');
+            
+            if (!contextMenuMessage) return;
+            
+            switch(action) {
+                case 'reply':
+                    replyToMessage(contextMenuMessage.msgId, contextMenuMessage.text, contextMenuMessage.senderName, contextMenuMessage.senderId);
+                    break;
+                case 'forward':
+                    openForwardModal(contextMenuMessage.text);
+                    break;
+                case 'edit':
+                    editMessage(contextMenuMessage.msgId, contextMenuMessage.text);
+                    break;
+                case 'emoji':
+                    showNotification('Emoji reactions coming soon!', 'info');
+                    break;
+                case 'delete':
+                    deleteMessage(contextMenuMessage.msgId, currentChatType === 'group');
+                    break;
             }
+            
+            contextMenuMessage = null;
+        }
+
+        // Close context menu when clicking outside
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('messageContextMenu');
+            if (!menu.contains(e.target)) {
+                menu.classList.remove('active');
+            }
+        });
+
+        function editMessage(msgId, currentText) {
+            const newText = prompt('Edit message:', currentText);
+            if (newText && newText.trim() && newText !== currentText) {
+                let messageRef;
+                if (currentChatType === 'group') {
+                    messageRef = db.collection('groups').doc(selectedContact.id).collection('messages').doc(msgId);
+                } else {
+                    const chatId = [currentUser.uid, selectedContact.id].sort().join('_');
+                    messageRef = db.collection('chats').doc(chatId).collection('messages').doc(msgId);
+                }
+                
+                messageRef.update({
+                    text: newText.trim(),
+                    edited: true
+                }).then(() => {
+                    showNotification('Message edited', 'success');
+                }).catch(error => {
+                    console.error('Error editing message:', error);
+                    showNotification('Failed to edit message', 'error');
+                });
+            }
+        }
+
+        async function openForwardModal(text) {
+            forwardingMessage = text;
+            const forwardList = document.getElementById('forwardList');
+            forwardList.innerHTML = '';
+            
+            // Load contacts
+            const currentUserDoc = await db.collection('users').doc(currentUser.uid).get();
+            const myContacts = currentUserDoc.data().contacts || [];
+            
+            for (const contactId of myContacts) {
+                const userDoc = await db.collection('users').doc(contactId).get();
+                if (!userDoc.exists) continue;
+                
+                const user = userDoc.data();
+                const item = document.createElement('div');
+                item.className = 'member-item';
+                item.innerHTML = `
+                    <input type="checkbox" class="member-checkbox" value="${contactId}" data-type="user">
+                    <div class="contact-avatar" style="width: 40px; height: 40px; font-size: 16px;">
+                        ${user.photoURL ? `<img src="${user.photoURL}" alt="${user.name}">` : user.name.charAt(0)}
+                    </div>
+                    <span>${user.name}</span>
+                `;
+                forwardList.appendChild(item);
+            }
+            
+            // Load groups
+            const groupsSnapshot = await db.collection('groups')
+                .where('members', 'array-contains', currentUser.uid)
+                .get();
+            
+            groupsSnapshot.forEach(doc => {
+                const group = doc.data();
+                const item = document.createElement('div');
+                item.className = 'member-item';
+                item.innerHTML = `
+                    <input type="checkbox" class="member-checkbox" value="${doc.id}" data-type="group">
+                    <div class="contact-avatar" style="width: 40px; height: 40px; font-size: 16px;">👥</div>
+                    <span>${group.name}</span>
+                `;
+                forwardList.appendChild(item);
+            });
+            
+            document.getElementById('forwardModal').classList.add('active');
+        }
+
+        async function confirmForward() {
+            const selected = document.querySelectorAll('#forwardList .member-checkbox:checked');
+            if (selected.length === 0) {
+                showNotification('Please select at least one recipient', 'warning');
+                return;
+            }
+            
+            const userDoc = await db.collection('users').doc(currentUser.uid).get();
+            const senderName = userDoc.data().name;
+            
+            for (const checkbox of selected) {
+                const recipientId = checkbox.value;
+                const type = checkbox.dataset.type;
+                
+                const messageData = {
+                    text: forwardingMessage,
+                    mediaUrl: null,
+                    mediaType: null,
+                    senderId: currentUser.uid,
+                    senderName: senderName,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    deleted: false,
+                    forwarded: true
+                };
+                
+                try {
+                    if (type === 'group') {
+                        await db.collection('groups').doc(recipientId).collection('messages').add(messageData);
+                    } else {
+                        const chatId = [currentUser.uid, recipientId].sort().join('_');
+                        messageData.receiverId = recipientId;
+                        await db.collection('chats').doc(chatId).collection('messages').add(messageData);
+                    }
+                } catch (error) {
+                    console.error('Error forwarding message:', error);
+                }
+            }
+            
+            closeModal('forwardModal');
+            showNotification('Message forwarded', 'success');
+            forwardingMessage = null;
         }
 
         function scrollToMessage(msgId) {
@@ -1850,6 +2207,7 @@
                 messageEl.style.backgroundColor = 'rgba(255, 215, 0, 0.3)';
                 setTimeout(() => {
                     messageEl.style.backgroundColor = '';
+                    messageEl.style.transition = 'background-color 1s';
                 }, 2000);
             }
         }
@@ -1914,22 +2272,22 @@
                 return;
             }
             
+            input.value = '';
+            const replyData = replyingTo;
+            cancelReply();
+            
             if (!isOnline) {
                 const queuedMsg = {
                     text: text,
                     contactId: selectedContact.id,
                     chatType: currentChatType,
                     timestamp: Date.now(),
-                    replyTo: replyingTo
+                    replyTo: replyData
                 };
                 
                 messageQueue.push(queuedMsg);
                 saveMessageQueue();
                 
-                addMessageToUI('temp-' + Date.now(), text, null, null, currentUser.uid, 'You', { toDate: () => new Date() }, currentChatType, false, replyingTo);
-                
-                input.value = '';
-                cancelReply();
                 showNotification('Message queued - will send when online', 'warning');
                 return;
             }
@@ -1946,7 +2304,7 @@
                     senderName: senderName,
                     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                     deleted: false,
-                    replyTo: replyingTo
+                    replyTo: replyData
                 };
 
                 if (currentChatType === 'group') {
@@ -1956,32 +2314,10 @@
                     messageData.receiverId = selectedContact.id;
                     await db.collection('chats').doc(chatId).collection('messages').add(messageData);
                 }
-                
-                input.value = '';
-                cancelReply();
             } catch (error) {
                 console.error('Error sending message:', error);
-                
-                if (error.code === 'unavailable' || error.code === 'permission-denied') {
-                    const queuedMsg = {
-                        text: text,
-                        contactId: selectedContact.id,
-                        chatType: currentChatType,
-                        timestamp: Date.now(),
-                        replyTo: replyingTo
-                    };
-                    
-                    messageQueue.push(queuedMsg);
-                    saveMessageQueue();
-                    showNotification('Connection issue - message queued', 'warning');
-                } else {
-                    showNotification('Failed to send message', 'error');
-                }
+                showNotification('Failed to send message. Please try again.', 'error');
             }
-        }
-
-        function showMediaAlert() {
-            alert('📷 Media Upload\n\nStorage setup required:\n1. Upgrade to Blaze plan (still FREE tier)\n2. Add credit card to Firebase\n3. Storage rules will activate\n\nText messaging works perfectly!');
         }
 
         function handleKeyPress(event) {
@@ -2030,7 +2366,7 @@
             const about = document.getElementById('profileAbout').value.trim();
 
             if (!name) {
-                alert('Name is required');
+                showNotification('Name is required', 'error');
                 return;
             }
 
@@ -2049,7 +2385,7 @@
                 showNotification('Profile updated successfully!', 'success');
             } catch (error) {
                 console.error('Error updating profile:', error);
-                alert('Failed to update profile');
+                showNotification('Failed to update profile', 'error');
             }
         }
 
@@ -2069,25 +2405,22 @@
             }
 
             try {
-                const usersSnapshot = await db.collection('users')
+                let usersSnapshot = await db.collection('users')
                     .where('email', '==', searchValue)
                     .get();
                 
-                let phoneSnapshot = { empty: true, docs: [] };
                 if (usersSnapshot.empty) {
-                    phoneSnapshot = await db.collection('users')
+                    usersSnapshot = await db.collection('users')
                         .where('phone', '==', searchValue)
                         .get();
                 }
 
-                const snapshot = !usersSnapshot.empty ? usersSnapshot : phoneSnapshot;
-
-                if (snapshot.empty || (snapshot.docs[0] && snapshot.docs[0].id === currentUser.uid)) {
+                if (usersSnapshot.empty || (usersSnapshot.docs[0] && usersSnapshot.docs[0].id === currentUser.uid)) {
                     resultDiv.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">No user found with this email or phone</p>';
                     return;
                 }
 
-                const userDoc = snapshot.docs[0];
+                const userDoc = usersSnapshot.docs[0];
                 const userData = userDoc.data();
                 const currentUserDoc = await db.collection('users').doc(currentUser.uid).get();
                 const myContacts = currentUserDoc.data().contacts || [];
@@ -2222,7 +2555,7 @@
             const description = document.getElementById('groupDescription').value.trim();
             
             if (!name) {
-                alert('Group name is required');
+                showNotification('Group name is required', 'error');
                 return;
             }
 
@@ -2232,7 +2565,7 @@
             });
 
             if (selectedMembers.length === 0) {
-                alert('Please select at least one member');
+                showNotification('Please select at least one member', 'error');
                 return;
             }
 
@@ -2261,7 +2594,7 @@
                 showNotification('Group created successfully!', 'success');
             } catch (error) {
                 console.error('Error creating group:', error);
-                alert('Failed to create group');
+                showNotification('Failed to create group', 'error');
             }
         }
 
@@ -2315,7 +2648,7 @@
             document.getElementById('groupInfoDescription').textContent = groupData.description || 'No description';
             document.getElementById('groupInfoMembers').textContent = `${groupData.members.length} members`;
             
-            const inviteLink = `${window.location.origin}?join=${groupData.inviteCode || groupDoc.id.substring(0, 8)}`;
+            const inviteLink = `${window.location.origin}${window.location.pathname}?join=${groupData.inviteCode || groupDoc.id.substring(0, 8)}`;
             document.getElementById('groupInviteLink').textContent = inviteLink;
             
             if (isAdmin) {
@@ -2370,7 +2703,7 @@
                 navigator.clipboard.writeText(message).then(() => {
                     showNotification('Invite message copied to clipboard!', 'success');
                 }).catch(() => {
-                    alert(message);
+                    showNotification(message, 'info');
                 });
             }
         }
@@ -2482,16 +2815,10 @@
                 document.getElementById('sidebar').classList.add('mobile-active');
             }
             
-            loadMessageQueue();
-            
-            if (isOnline && messageQueue.length > 0) {
-                console.log(`📤 Found ${messageQueue.length} queued messages, will sync when logged in`);
-            }
-            
             const urlParams = new URLSearchParams(window.location.search);
             const joinCode = urlParams.get('join');
-            if (joinCode && currentUser) {
-                joinGroupByInvite(joinCode);
+            if (joinCode) {
+                localStorage.setItem('pendingGroupJoin', joinCode);
             }
         };
 
@@ -2521,11 +2848,20 @@
                 showNotification(`You joined ${groupData.name}!`, 'success');
                 switchTab('groups');
                 document.querySelectorAll('.tab')[1].click();
+                localStorage.removeItem('pendingGroupJoin');
             } catch (error) {
                 console.error('Error joining group:', error);
                 showNotification('Failed to join group', 'error');
             }
         }
+
+        // Check for pending group join after login
+        setInterval(() => {
+            const pendingJoin = localStorage.getItem('pendingGroupJoin');
+            if (pendingJoin && currentUser) {
+                joinGroupByInvite(pendingJoin);
+            }
+        }, 2000);
 
         window.addEventListener('resize', () => {
             if (window.innerWidth > 768) {
